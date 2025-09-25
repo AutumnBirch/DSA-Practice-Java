@@ -53,7 +53,7 @@ public class MyArrayList {
     // toString方法，方便打印顺序表查看表内情况
     @Override
     public String toString() {
-        return "顺序表：" + Arrays.toString(arr) +
+        return "顺序表：" + Arrays.toString(Arrays.copyOf(arr,size)) +
                 "\n顺序表容量：" + capacity +
                 "\n有效元素数量：" + size;
     }
@@ -83,6 +83,90 @@ public class MyArrayList {
     }
 
     /**
+     * 功能：删除顺序表内指定位置元素
+     *      如果要删除元素的索引在有效范围内，
+     *      从index开始，循环把元素依次往前移一位arr[index] = arr[index+1]，
+     *      有效元素量-1（size--），
+     *      顺序表有效元素量较少时可以考虑缩容
+     * 参数：
+     *      要删除元素的索引index
+     * 返回值：void
+     */
+    public void deleteElement(int index){
+        // 先判断顺序表是否为空
+        if (isEmpty()) {
+            System.out.println("顺序表已空");
+        }else {
+            // 先判断输入的索引是否在有效范围内
+            if (index>=0 && index <size) {
+                // 如果在，直接将后面的元素全部前移一位
+                // leftPointer < size - 1，这里为啥是size-1？还有点不太明白，先记着
+                for (int leftPointer = index; leftPointer < size - 1; leftPointer++) {
+                    arr[leftPointer] = arr[leftPointer+1];
+                }
+                // 有效元素量减一
+                size--;
+                System.out.println("删除索引" + index + "的元素成功");
+            }else {
+                // 如果不在有效范围内，输出错误日志
+                System.out.println("索引超出有效范围，有效索引为0~" + (size - 1));
+            }
+        }
+
+    }
+
+    /**
+     * 功能：查询顺序表指定位置的元素
+     * 参数：
+     *  需要查询的元素索引 index
+     * 返回值：
+     *  查询到的元素
+     */
+    public int getElement(int index){
+        if (index>=0 && index<size){
+            return arr[index];
+        }else {
+            System.out.println("查询索引超出有效范围");
+            return -1;
+        }
+    }
+
+    /**
+     * 功能：修改顺序表指定位置的元素
+     * 参数：
+     *  index:元素索引
+     *  element:修改后的元素
+     * 返回值：void
+     */
+    public void setElement(int index, int element){
+        if (index>=0 && index<size){
+            arr[index] = element;
+        }else {
+            System.out.println("修改索引超出有效范围，请重新设置");
+        }
+    }
+
+    /**
+     * 功能：清空顺序表
+     * 参数：void
+     * 返回值：void
+     */
+    public void clear(){
+        // 数组的数值统一修改成0
+        Arrays.fill(arr,0,size,0);
+        this.size = 0;
+    }
+
+    /**
+     * 功能：判断顺序表是否为空
+     * 参数：void
+     * 返回值：void
+     */
+    public boolean isEmpty(){
+        return size == 0;
+    }
+
+    /**
      * 功能：在顺序表有效元素范围内指定位置插入元素，
      * 若所插入元素位置大于有效元素长度，则直接将元素添加到顺序表末尾，
      * 如果所插入位置索引小于0，则输出索引越界日志
@@ -92,25 +176,22 @@ public class MyArrayList {
      */
     public void insertElement(int index, int element){
         // 先判断所插入元素是否在有效范围内
-        if (index>size) {
-            // 如果所插入位置索引大于有效元素长度，则直接将元素添加到顺序表末尾
-            addElement(element);
-        }else if (index < 0){
-            // 如果所插入位置索引小于0
-            System.out.println("索引越界，请输入正确的索引！");
+        if (index < 0 || index > size) {
+            // 如果所插入位置索引不在有效范围内，输出报错日志
+            System.out.println("索引越界，有效范围是0<=index<=size");
         }else {
             // 如果所插入位置在有效范围内
             // 先判断顺序表是否会满或者已满
-            if (size+1>=capacity || size>=capacity){
+            if (size>=capacity){
                 // 如果会满或者已满，则先自动扩容
                 expandCapacity();
             }
             // 从后往前依次将元素后移一位
             // 定义一个整型变量作为指针指向最后一个有效元素的索引
             // 循环判断右指针是否已经指向要插入元素的位置
-            for (int rightPoint = size - 1; rightPoint > index; rightPoint--) {
+            for (int rightPointer = size - 1; rightPointer >= index; rightPointer--) {
                 // 如果右指针在插入元素位置的右边，则将现在指向的元素后移一位，直至右指针在所插入元素位置的左边
-                arr[rightPoint +1] = arr[rightPoint];
+                arr[rightPointer +1] = arr[rightPointer];
             }
             // 挪完后面所有元素后，在当前指定位置插入元素
             arr[index] = element;
@@ -134,7 +215,7 @@ public class MyArrayList {
         // 新建数组
         int[] newArr = new int[newCapacity];
         // 复制原数组至新数组
-        System.arraycopy(arr,0,newArr,0,capacity);
+        System.arraycopy(arr,0,newArr,0,size);
         // 使用新数组替代原数组
         this.arr = newArr;
         // 将数组长度修改为扩容后的长度
@@ -160,7 +241,37 @@ public class MyArrayList {
 
         // 在顺序表指定位置插入元素
         data.insertElement(0,191);
+        data.insertElement(10,191);
         System.out.println(data);
+
+        // 删除开头/中间/末尾元素
+        data.deleteElement(0);
+        data.deleteElement(10);
+        data.deleteElement(5);
+        System.out.println(data);
+
+        // 连续插入多次查看是否扩容
+        data.insertElement(2,123);
+        data.insertElement(2,12);
+        data.insertElement(2,33);
+        data.insertElement(2,99);
+        data.insertElement(2,58);
+        System.out.println(data);
+
+        // 清空表
+        data.clear();
+        System.out.println(data);
+
+        // 对空表删除
+        data.deleteElement(0);
+        System.out.println(data);
+
+        // 对空表插入
+        data.insertElement(0,1234);
+        System.out.println(data);
+
+        MyArrayList data2 = new MyArrayList(15);
+        System.out.println(data2);
     }
 }
 

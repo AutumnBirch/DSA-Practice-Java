@@ -50,6 +50,13 @@ public class MyArrayList {
         }
     }
 
+    // toString方法，方便打印顺序表查看表内情况
+    @Override
+    public String toString() {
+        return "顺序表：" + Arrays.toString(arr) +
+                "\n顺序表容量：" + capacity +
+                "\n有效元素数量：" + size;
+    }
     /**
      * 功能：添加元素到顺序表的末尾
      * 参数：int element 要添加的元素
@@ -65,69 +72,75 @@ public class MyArrayList {
             System.out.println("元素添加成功！");
         }else {
             // 如果顺序表已满，自动扩容至原1.5倍大小
-            int newCapacity = capacity + capacity / 2;
-            // 新建数组
-            int[] newArr = new int[newCapacity];
-            // 复制原数组至新数组
-            System.arraycopy(arr,0,newArr,0,capacity);
-            // 使用新数组替代原数组
-            this.arr = newArr;
-            // 将数组长度修改为扩容后的长度
-            this.capacity = newCapacity;
+            expandCapacity();
             //扩容成功后继续添加元素
             arr[size] = element;
             // 元素添加完成后索引指针后移
             size++;
             // 输出提示
-            System.out.println("顺序表已满，已扩容至："+newCapacity+". 添加元素成功！");
+            System.out.println("添加元素成功！");
         }
     }
 
     /**
-     * 功能：在顺序表指定位置插入元素
+     * 功能：在顺序表有效元素范围内指定位置插入元素，
+     * 若所插入元素位置大于有效元素长度，则直接将元素添加到顺序表末尾，
+     * 如果所插入位置索引小于0，则输出索引越界日志
      * 参数：int index, int element
      *  分别为要插入的位置和要插入的元素
      * 返回值：void
      */
     public void insertElement(int index, int element){
-        // 先判断所插入位置是否已经存在元素
-        if (arr[index] == 0) {
-            // 如果不存在，则直接将要元素插入
-            arr[index] = element;
-            // 有效元素量+1
-            size++;
+        // 先判断所插入元素是否在有效范围内
+        if (index>size) {
+            // 如果所插入位置索引大于有效元素长度，则直接将元素添加到顺序表末尾
+            addElement(element);
+        }else if (index < 0){
+            // 如果所插入位置索引小于0
+            System.out.println("索引越界，请输入正确的索引！");
         }else {
-            // 如果存在，则将该位置及之后元素后移，再插入元素
-            // 把当前位置的下一个元素给临时变量1
-            int temp1 = arr[index+1];
-            // 把当前位置的元素放到下一个元素刚刚空出来的位置
-            arr[index+1] = arr[index];
-            int temp2 = temp1;
-            for (int i = index; i < capacity; i++) {
-                // 把当前索引的下下个给第一个临时变量
-                temp1 = arr[i+2];
-                //
-                arr[i+2] = temp2;
-                temp2 = temp1;
-                if (temp1 == 0) {
-                    break;
-                }
+            // 如果所插入位置在有效范围内
+            // 先判断顺序表是否会满或者已满
+            if (size+1>=capacity || size>=capacity){
+                // 如果会满或者已满，则先自动扩容
+                expandCapacity();
+            }
+            // 从后往前依次将元素后移一位
+            // 定义一个整型变量作为指针指向最后一个有效元素的索引
+            // 循环判断右指针是否已经指向要插入元素的位置
+            for (int rightPoint = size - 1; rightPoint > index; rightPoint--) {
+                // 如果右指针在插入元素位置的右边，则将现在指向的元素后移一位，直至右指针在所插入元素位置的左边
+                arr[rightPoint +1] = arr[rightPoint];
             }
             // 挪完后面所有元素后，在当前指定位置插入元素
             arr[index] = element;
             // 有效元素量+1
             size++;
-            System.out.println("元素插入成功！");
+            // 输出日志
+            System.out.println("元素插入成功！\n");
         }
     }
 
-
-    // toString方法，方便打印顺序表查看表内情况
-    @Override
-    public String toString() {
-        return "顺序表：" + Arrays.toString(arr) +
-                "，顺序表容量：" + capacity +
-                "，有效元素数量：" + size;
+    /**
+     * 功能：顺序表扩容
+     *      根据顺序表原容量计算新容量
+     *      创建新数组newArr，复制元素至新数组
+     *      更新顺序表内存储元素的数组arr以及顺序表的容量capacity
+     * 参数：void
+     * 返回值：void
+     */
+    public void expandCapacity(){
+        int newCapacity = capacity + capacity / 2;
+        // 新建数组
+        int[] newArr = new int[newCapacity];
+        // 复制原数组至新数组
+        System.arraycopy(arr,0,newArr,0,capacity);
+        // 使用新数组替代原数组
+        this.arr = newArr;
+        // 将数组长度修改为扩容后的长度
+        this.capacity = newCapacity;
+        //输出日志
+        System.out.println("顺序表已满，已扩容至："+newCapacity+"\n");
     }
 
     // 主程序入口，用于测试顺序表功能
@@ -146,7 +159,7 @@ public class MyArrayList {
         System.out.println(data);
 
         // 在顺序表指定位置插入元素
-        data.insertElement(7,191);
+        data.insertElement(0,191);
         System.out.println(data);
     }
 }
